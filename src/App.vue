@@ -13,7 +13,7 @@ const form = reactive({
 </script>
 
 <template>
-  <TableSearchWrapper :form="form">
+  <TableSearchWrapper :form="form" style="margin: 48px;">
     <template v-slot:item1>
       <a-form-item field="field1" label="筛选项1">
         <a-input v-model="form.field1" />
