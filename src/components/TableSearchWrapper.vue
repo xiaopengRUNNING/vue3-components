@@ -1,13 +1,21 @@
 <script setup>
-import { IconSearch, IconRefresh } from '@arco-design/web-vue/es/icon';
+import {
+  IconSearch,
+  IconRefresh,
+  IconUp,
+  IconDown
+} from '@arco-design/web-vue/es/icon';
 import {
   computed,
   useSlots,
   toRaw,
   onMounted,
   reactive,
-  onUnmounted
+  onUnmounted,
+  ref
 } from 'vue';
+
+const collapsed = ref(false);
 
 const cols = { xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 };
 
@@ -51,7 +59,7 @@ const resultCol = computed(() => {
   return res;
 });
 const multipleRows = computed(() => {
-  return allSlotsName.value.length > resultCol.value;
+  return !collapsed.value && allSlotsName.value.length > resultCol.value;
 });
 
 const matchHandlers = {};
@@ -93,50 +101,68 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <a-row>
-    <a-col :flex="1">
-      <!-- 此处就是用来显示输入框、选择器这类组件的地方 -->
-      <a-form :model="props.form" :auto-label-width="true">
-        <a-grid :col-gap="16" :row-gap="0" :cols="cols">
-          <slot v-for="item in allSlotsName" :key="item" :name="item"></slot>
-        </a-grid>
-      </a-form>
-    </a-col>
-    <a-col :flex="multipleRows ? '108px' : '198px'" style="display: flex">
-      <a-divider
-        direction="vertical"
-        :style="{ height: multipleRows ? '84px' : '32px' }"
-      />
-      <!-- 放置按钮区域 -->
-      <div
-        style="
-          flex: 1;
-          display: flex;
-          justify-content: space-between;
-          flex-wrap: wrap;
-        "
-      >
-        <a-button
-          :style="{
-            marginBottom: multipleRows ? '20px' : '0px'
-          }"
-          @click="onSearchQuery"
-          type="primary"
+  <div style="overflow: hidden">
+    <a-row>
+      <a-col :flex="1">
+        <!-- 此处就是用来显示输入框、选择器这类组件的地方 -->
+        <a-form :model="props.form" :auto-label-width="true">
+          <a-grid
+            :col-gap="16"
+            :row-gap="0"
+            :cols="cols"
+            :collapsed="collapsed"
+          >
+            <a-grid-item v-for="item in allSlotsName" :key="item">
+              <slot :name="item"></slot>
+            </a-grid-item>
+          </a-grid>
+        </a-form>
+      </a-col>
+      <a-col :flex="multipleRows ? '108px' : '198px'" style="display: flex">
+        <a-divider
+          direction="vertical"
+          :style="{ height: multipleRows ? '84px' : '32px' }"
+        />
+        <!-- 放置按钮区域 -->
+        <div
+          style="
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+          "
         >
-          <template #icon>
-            <icon-search />
-          </template>
-          查询
-        </a-button>
-        <a-button @click="onResetQuery">
-          <template #icon>
-            <icon-refresh />
-          </template>
-          重置
-        </a-button>
-      </div>
-    </a-col>
-  </a-row>
+          <a-button
+            :style="{
+              marginBottom: multipleRows ? '20px' : '0px'
+            }"
+            @click="onSearchQuery"
+            type="primary"
+          >
+            <template #icon>
+              <icon-search />
+            </template>
+            查询
+          </a-button>
+          <a-button @click="onResetQuery">
+            <template #icon>
+              <icon-refresh />
+            </template>
+            重置
+          </a-button>
+        </div>
+      </a-col>
+    </a-row>
+    <a
+      v-if="resultCol < allSlotsName.length"
+      style="cursor: pointer; float: right"
+      @click="collapsed = !collapsed"
+    >
+      {{ collapsed ? '展开' : '收起' }}
+      <IconDown v-if="collapsed" />
+      <IconUp v-else />
+    </a>
+  </div>
 </template>
 
 <style scoped></style>
