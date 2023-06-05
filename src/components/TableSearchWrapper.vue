@@ -59,6 +59,10 @@ const resultCol = computed(() => {
   return res;
 });
 const multipleRows = computed(() => {
+  if (collapsed.value || allSlotsName.value.length <= resultCol.value) {
+    return 1;
+  }
+  return Math.ceil(allSlotsName.value.length / resultCol.value);
   return !collapsed.value && allSlotsName.value.length > resultCol.value;
 });
 
@@ -101,7 +105,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div style="overflow: hidden">
+  <div style="overflow: hidden; position: relative">
     <a-row>
       <a-col :flex="1">
         <!-- 此处就是用来显示输入框、选择器这类组件的地方 -->
@@ -118,10 +122,10 @@ onUnmounted(() => {
           </a-grid>
         </a-form>
       </a-col>
-      <a-col :flex="multipleRows ? '108px' : '198px'" style="display: flex">
+      <a-col :flex="multipleRows > 1 ? '108px' : '198px'" style="display: flex">
         <a-divider
           direction="vertical"
-          :style="{ height: multipleRows ? '84px' : '32px' }"
+          :style="{ height: multipleRows > 1 ? '84px' : '32px' }"
         />
         <!-- 放置按钮区域 -->
         <div
@@ -134,7 +138,7 @@ onUnmounted(() => {
         >
           <a-button
             :style="{
-              marginBottom: multipleRows ? '20px' : '0px'
+              marginBottom: multipleRows > 1 ? '20px' : '0px'
             }"
             @click="onSearchQuery"
             type="primary"
@@ -155,7 +159,7 @@ onUnmounted(() => {
     </a-row>
     <a
       v-if="resultCol < allSlotsName.length"
-      style="cursor: pointer; float: right"
+      :class="['collapsed-action', multipleRows <= 2 ? 'normal' : 'position']"
       @click="collapsed = !collapsed"
     >
       {{ collapsed ? '展开' : '收起' }}
@@ -165,4 +169,17 @@ onUnmounted(() => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.collapsed-action {
+  cursor: pointer;
+}
+.normal {
+  float: right;
+  margin-top: -8px;
+}
+.position {
+  position: absolute;
+  right: 0px;
+  top: 92px;
+}
+</style>
